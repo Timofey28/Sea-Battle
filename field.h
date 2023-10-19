@@ -1,4 +1,5 @@
 #pragma once
+#include "arrangement_validity.h"
 
 
 class Field
@@ -9,18 +10,28 @@ class Field
 
     void arrangeShipsRandomly();
     void markEmptyCellAsShot(int fieldX, int fieldY);
+    void circleDeadShip(int x, int y, std::vector<char> sides);
 public:
     int zeroCoordPointerX, zeroCoordPointerY;
     int deadCounter;
     bool aboutToFinishAShip;
 
     Field();
-//    bool hasShipAt(int x, int y) {return location[x][y];}
-    bool wasShotAt(int x, int y) {return shooting[x][y];}
+    bool wasShotAt(int x, int y) { return shooting[x][y]; }
     bool shootAt(int x, int y);
-    void shipsArrangement_manual();
+    void shipsArrangement_manual(const int indent, const int positionFromTop, const int consoleWidth);
     void shipsArrangement_automatic(int indentX, int indentY, int consoleWidth, int consoleHeight);
     void shipsArrangement_forComputer() {arrangeShipsRandomly();}
     void drawShips(int indentX, int indentY);
     void revealSurvivorsAfterLoss();
+};
+
+struct ClickInfo
+{
+    short x, y;
+    char button;
+    // 'l' - ЛКМ
+    // 'r' - ПКМ
+    // 'w' - колесико (wheel)
+    bool outside_field;
 };

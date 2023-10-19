@@ -1,6 +1,6 @@
 @echo off
 
-set FILES= main.cpp field.h field.cpp
+set FILES= main.cc field.h field.cc arrangement_validity.h arrangement_validity.cc
 
 
 for %%a in (%FILES%) do (

@@ -2,7 +2,9 @@
 #include <conio.h>
 #include <Windows.h>
 #include "field.h"
-#include "field.cpp"
+#include "field.cc"
+#include "arrangement_validity.h"
+#include "arrangement_validity.cc"
 using namespace std;
 
 int consoleWidth, consoleHeight;
@@ -16,10 +18,11 @@ int firstMenu();
 void draw_shipsArrangement(int indent);
 void draw_play(int indent2nd);
 void playTime(int indent2nd);
-pair<short, short> getClickCoords(int indentX, int indentY);
+ClickInfo getClickCoords(int indentX, int indentY, bool has_done_button);
 void victory();
 void loss();
 void draw_arrows(Field& field, string how);
+void draw_manual(int indent);
 
 
 int main()
@@ -29,18 +32,16 @@ int main()
 
     fEnemy.shipsArrangement_forComputer();
 
-    backToFirstMenu:
     int choice = firstMenu();
+
+    int indent_1Field = (consoleWidth / 2 - 1) / 2 - 30; // длина поля == 61
+    fMe.zeroCoordPointerX = indent_1Field + 2;
+    fMe.zeroCoordPointerY = positionFromTop + 2;
+    fEnemy.zeroCoordPointerY = positionFromTop + 2;
     if(choice == 1) { // manual
-//        goto backToFirstMenu;
-        return 0;
+        draw_manual(indent_1Field);
     }
     else if(choice == 2) { // automatic
-        int indent_1Field = (consoleWidth / 2 - 1) / 2 - 30; // длина поля == 61
-        fMe.zeroCoordPointerX = indent_1Field + 2;
-        fMe.zeroCoordPointerY = positionFromTop + 2;
-        fEnemy.zeroCoordPointerY = positionFromTop + 2;
-
         draw_shipsArrangement(indent_1Field);
         fMe.shipsArrangement_automatic(indent_1Field + 2, positionFromTop + 2, consoleWidth, consoleHeight);
     }
@@ -63,19 +64,21 @@ void playTime(int indent2nd)
     for(int i = 0; i < 100; ++i) free[i] = i;
     random_shuffle(free.begin(), free.end(), [](int i){return mersenne() % i;});
     int no = 0;
-    int x0 = -1, y0, x1 = -1, y1; // finish...
+    int x0 = -1, y0, x1 = -1, y1; // finish ship...
     vector<char> sides;
     sides.reserve(4);
     bool hitAgain = false;
+    ClickInfo clickInfo;
 
     setColor(11);
     while(1) {
         while(2) {
             if(!hitAgain) draw_arrows(fEnemy, "green");
-            xy = getClickCoords(indent2nd, positionFromTop);
+            do clickInfo = getClickCoords(indent2nd, positionFromTop);
+            while(fEnemy.wasShotAt(clickInfo.x, clickInfo.y));
             if(clock() - startTime <= 1000) continue;
-            fieldX = xy.first;
-            fieldY = xy.second;
+            fieldX = clickInfo.x;
+            fieldY = clickInfo.y;
             bool result = fEnemy.shootAt(fieldX, fieldY);
             if(!result) {
                 draw_arrows(fEnemy, "empty");
@@ -84,7 +87,9 @@ void playTime(int indent2nd)
             }
 
             if(fEnemy.deadCounter == 10) {
+                draw_arrows(fMe, "empty");
                 victory();
+                _getch();
                 exit(0);
             }
             if(!hitAgain) {
@@ -183,8 +188,10 @@ void playTime(int indent2nd)
             }
 
             if(fMe.deadCounter == 10) {
+                draw_arrows(fEnemy, "empty");
                 loss();
                 fEnemy.revealSurvivorsAfterLoss();
+                _getch();
                 exit(0);
             }
 
@@ -195,39 +202,6 @@ void playTime(int indent2nd)
         }
     }
     setColor(15);
-}
-
-pair<short, short> getClickCoords(int indentX, int indentY)
-{
-    HANDLE hin = GetStdHandle(STD_INPUT_HANDLE); // получаем дескриптор
-    INPUT_RECORD InputRecord; // используется для возвращения информации о входных сообщениях в консольном входном буфере
-    DWORD Events; // unsigned long
-    COORD coord;
-
-    // Запретить выдеение консоли
-    DWORD prev_mode;
-    GetConsoleMode(hin, &prev_mode);
-    SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_EXTENDED_FLAGS | (prev_mode & ~ENABLE_QUICK_EDIT_MODE));
-    SetConsoleMode(hin, ENABLE_MOUSE_INPUT); // разрешаем обработку мыши
-
-    short x, y;
-    while(1) {
-        ReadConsoleInput(hin, &InputRecord, 1, &Events);
-        if(InputRecord.Event.MouseEvent.dwButtonState == MOUSE_WHEELED ||
-           InputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-        {
-            x = InputRecord.Event.MouseEvent.dwMousePosition.X - indentX;
-            y = InputRecord.Event.MouseEvent.dwMousePosition.Y - indentY;
-            if(x > 0 && x < 61 && (x % 6 != 0) && y > 0 && y <= 30) {
-                x /= 6;
-                y = (y-1) / 3;
-                if(!fEnemy.wasShotAt(x, y)) {
-//                    SetConsoleMode(hin, prev_mode);
-                    return {x, y};
-                }
-            }
-        }
-    }
 }
 
 int firstMenu()
@@ -339,6 +313,14 @@ void draw_shipsArrangement(int indent)
     setColor(15);
 }
 
+void draw_manual(int indent)
+{
+    fMe.zeroCoordPointerX = indent + 2;
+    fMe.zeroCoordPointerY = positionFromTop + 2;
+    fMe.shipsArrangement_manual(indent, positionFromTop, consoleWidth);
+    setColor(15);
+}
+
 void draw_play(int indent2nd)
 {
     int horizontalLineLength;
@@ -386,7 +368,7 @@ void draw_arrows(Field& field, string how)
     }
     else {
         char arrow = 25;
-        int color;
+        int color = 0;
         if(how == "green") color = 10;
         else if(how == "red") color = 4;
         setColor(color);
@@ -407,13 +389,12 @@ void victory()
     int indentY = consoleHeight / 3;
     setColor(10);
     setPosition(indentX, indentY); cout << "__     ___      _";
-    setPosition(indentX, indentY + 1); cout << "\\ \\   / (_) ___| |_ ___  _ __ _   _";
+    setPosition(indentX, indentY + 1); cout << "\\ \\   / (_) ___| |_ ___  _ __ _   _ ";
     setPosition(indentX, indentY + 2); cout << " \\ \\ / /| |/ __| __/ _ \\| '__| | | |";
     setPosition(indentX, indentY + 3); cout << "  \\ V / | | (__| || (_) | |  | |_| |";
     setPosition(indentX, indentY + 4); cout << "   \\_/  |_|\\___|\\__\\___/|_|   \\__, |";
     setPosition(indentX, indentY + 5); cout << "                              |___/";
     setColor(15);
-    _getch();
 }
 
 void loss()
@@ -428,7 +409,6 @@ void loss()
     setPosition(indentX, indentY + 3); cout << "| |__| |_| |___) | |___|  _ <";
     setPosition(indentX, indentY + 4); cout << "|_____\\___/|____/|_____|_| \\_\\";
     setColor(15);
-    _getch();
 }
 
 //void loss()
@@ -465,7 +445,7 @@ void setConsole()
     // открытие консоли во весь экран
     ::SendMessage(::GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
 
-    // установка размера текста в консоли
+    // установка размера шрифта в консоли
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 //    CONSOLE_FONT_INFOEX fontInfo;
 //    fontInfo.cbSize = sizeof(fontInfo);
