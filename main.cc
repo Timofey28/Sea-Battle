@@ -12,7 +12,7 @@ int positionFromTop = -3;
 Field fMe, fEnemy;
 clock_t startTime;
 
-void setConsole();
+void configureConsole();
 void getConsoleWH();
 int firstMenu();
 void draw_shipsArrangement(int indent);
@@ -28,7 +28,7 @@ void draw_manual(int indent);
 int main()
 {
     setlocale(0, "");
-    setConsole();
+    configureConsole();
 
     fEnemy.shipsArrangement_forComputer();
 
@@ -215,7 +215,7 @@ int firstMenu()
 \n" << indent1 << "\\___ \\| '_ \\| | '_ \\/ __|\
 \n" << indent1 << " ___) | | | | | |_) \\__ \\\
 \n" << indent1 << "|____/|_| |_|_| .__/|___/\
-\n" << indent1 << "              |_|\                        _\
+\n" << indent1 << "              |_|                        _\
 \n" << indent2 << "  __ _ _ __ _ __ __ _ _ __   __ _  ___ _ __ ___   ___ _ __ | |_\
 \n" << indent2 << " / _` | '__| '__/ _` | '_ \\ / _` |/ _ \\ '_ ` _ \\ / _ \\ '_ \\| __|\
 \n" << indent2 << "| (_| | |  | | | (_| | | | | (_| |  __/ | | | | |  __/ | | | |_\
@@ -390,10 +390,10 @@ void victory()
     setColor(10);
     setPosition(indentX, indentY); cout << "__     ___      _";
     setPosition(indentX, indentY + 1); cout << "\\ \\   / (_) ___| |_ ___  _ __ _   _ ";
-    setPosition(indentX, indentY + 2); cout << " \\ \\ / /| |/ __| __/ _ \\| '__| | | |";
-    setPosition(indentX, indentY + 3); cout << "  \\ V / | | (__| || (_) | |  | |_| |";
-    setPosition(indentX, indentY + 4); cout << "   \\_/  |_|\\___|\\__\\___/|_|   \\__, |";
-    setPosition(indentX, indentY + 5); cout << "                              |___/";
+    setPosition(indentX, indentY + 2); cout << " \\ \\ / /| |/ __| __/ _ \\| '__| | | | ";
+    setPosition(indentX, indentY + 3); cout << "  \\ V / | | (__| || (_) | |  | |_| | ";
+    setPosition(indentX, indentY + 4); cout << "   \\_/  |_|\\___|\\__\\___/|_|   \\__, | ";
+    setPosition(indentX, indentY + 5); cout << "                              |___/ ";
     setColor(15);
 }
 
@@ -404,66 +404,41 @@ void loss()
     int indentY = consoleHeight / 3;
     setColor(4);
     setPosition(indentX, indentY); cout << " _     ___  ____  _____ ____";
-    setPosition(indentX, indentY + 1); cout << "| |   / _ \\/ ___|| ____|  _ \\";
-    setPosition(indentX, indentY + 2); cout << "| |  | | | \\___ \\|  _| | |_) |";
-    setPosition(indentX, indentY + 3); cout << "| |__| |_| |___) | |___|  _ <";
-    setPosition(indentX, indentY + 4); cout << "|_____\\___/|____/|_____|_| \\_\\";
+    setPosition(indentX, indentY + 1); cout << "| |   / _ \\/ ___|| ____|  _ \\ ";
+    setPosition(indentX, indentY + 2); cout << "| |  | | | \\___ \\|  _| | |_) | ";
+    setPosition(indentX, indentY + 3); cout << "| |__| |_| |___) | |___|  _ < ";
+    setPosition(indentX, indentY + 4); cout << "|_____\\___/|____/|_____|_| \\_\\ ";
     setColor(15);
 }
 
-//void loss()
-//{
-//    int indentX = consoleWidth / 2 - 58; // ширина слова == 117
-//    int indentY = consoleHeight / 2 - 12;
-//    setColor(4);
-//    setPosition(indentX + 10, indentY); cout << "_____           _______                   _____                    _____                    _____";
-//    setPosition(indentX + 9, indentY + 1); cout << "/\\    \\         /::\\    \\                 /\\    \\                  /\\    \\                  /\\    \\";
-//    setPosition(indentX + 8, indentY + 2); cout << "/::\\____\\       /::::\\    \\               /::\\    \\                /::\\    \\                /::\\    \\";
-//    setPosition(indentX + 7, indentY + 3); cout << "/:::/    /      /::::::\\    \\             /::::\\    \\              /::::\\    \\              /::::\\    \\";
-//    setPosition(indentX + 6, indentY + 4); cout << "/:::/    /      /::::::::\\    \\           /::::::\\    \\            /::::::\\    \\            /::::::\\    \\";
-//    setPosition(indentX + 5, indentY + 5); cout << "/:::/    /      /:::/~~\\:::\\    \\         /:::/\\:::\\    \\          /:::/\\:::\\    \\          /:::/\\:::\\    \\";
-//    setPosition(indentX + 4, indentY + 6); cout << "/:::/    /      /:::/    \\:::\\    \\       /:::/__\\:::\\    \\        /:::/__\\:::\\    \\        /:::/__\\:::\\    \\";
-//    setPosition(indentX + 3, indentY + 7); cout << "/:::/    /      /:::/    / \\:::\\    \\      \\:::\\   \\:::\\    \\      /::::\\   \\:::\\    \\      /::::\\   \\:::\\    \\";
-//    setPosition(indentX + 2, indentY + 8); cout << "/:::/    /      /:::/____/   \\:::\\____\\   ___\\:::\\   \\:::\\    \\    /::::::\\   \\:::\\    \\    /::::::\\   \\:::\\    \\";
-//    setPosition(indentX + 1, indentY + 9); cout << "/:::/    /      |:::|    |     |:::|    | /\\   \\:::\\   \\:::\\    \\  /:::/\\:::\\   \\:::\\    \\  /:::/\\:::\\   \\:::\\____\\";
-//    setPosition(indentX, indentY + 10); cout << "/:::/____/       |:::|____|     |:::|    |/::\\   \\:::\\   \\:::\\____\\/:::/__\\:::\\   \\:::\\____\\/:::/  \\:::\\   \\:::|    |";
-//    setPosition(indentX, indentY + 11); cout << "\\:::\\    \\        \\:::\\    \\   /:::/    / \\:::\\   \\:::\\   \\::/    /\\:::\\   \\:::\\   \\::/    /\\::/   |::::\\  /:::|____|";
-//    setPosition(indentX + 1, indentY + 12); cout << "\\:::\\    \\        \\:::\\    \\ /:::/    /   \\:::\\   \\:::\\   \\/____/  \\:::\\   \\:::\\   \\/____/  \\/____|:::::\\/:::/    /";
-//    setPosition(indentX + 2, indentY + 13); cout << "\\:::\\    \\        \\:::\\    /:::/    /     \\:::\\   \\:::\\    \\       \\:::\\   \\:::\\    \\            |:::::::::/    /";
-//    setPosition(indentX + 3, indentY + 14); cout << "\\:::\\    \\        \\:::\\__/:::/    /       \\:::\\   \\:::\\____\\       \\:::\\   \\:::\\____\\           |::|\\::::/    /";
-//    setPosition(indentX + 4, indentY + 15); cout << "\\:::\\    \\        \\::::::::/    /         \\:::\\  /:::/    /        \\:::\\   \\::/    /           |::| \\::/____/";
-//    setPosition(indentX + 5, indentY + 16); cout << "\\:::\\    \\        \\::::::/    /           \\:::\\/:::/    /          \\:::\\   \\/____/            |::|  ~|";
-//    setPosition(indentX + 6, indentY + 17); cout << "\\:::\\    \\        \\::::/    /             \\::::::/    /            \\:::\\    \\                |::|   |";
-//    setPosition(indentX + 7, indentY + 18); cout << "\\:::\\____\\        \\::/____/               \\::::/    /              \\:::\\____\\               \\::|   |";
-//    setPosition(indentX + 8, indentY + 19); cout << "\\::/    /         ~~                      \\::/    /                \\::/    /                \\:|   |";
-//    setPosition(indentX + 9, indentY + 20); cout << "\\/____/                                   \\/____/                  \\/____/                  \\|___|";
-//    setColor(15);
-//}
-
-void setConsole()
+void configureConsole()
 {
-    // открытие консоли во весь экран
-    ::SendMessage(::GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
+    int monitorHeight = GetSystemMetrics(SM_CYSCREEN);  // высота монитора компьютера в пикселях
+    int suitableFontSize = monitorHeight / 40;
 
     // установка размера шрифта в консоли
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-//    CONSOLE_FONT_INFOEX fontInfo;
-//    fontInfo.cbSize = sizeof(fontInfo);
-//    GetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
-//    fontInfo.dwFontSize.Y = 24;
-//    SetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
-
-    getConsoleWH();
-    positionFromTop = consoleHeight / 2 - 15   -1; // высота игрового поля == 30
+    CONSOLE_FONT_INFOEX fontInfo;
+    fontInfo.cbSize = sizeof(fontInfo);
+    GetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
+    fontInfo.dwFontSize.Y = suitableFontSize;
+    SetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
 
     // установка размера буфера экрана равным текущему размеру окна
+    getConsoleWH();
     COORD newScreenBufferSize;
-    newScreenBufferSize.X = consoleWidth;
-    newScreenBufferSize.Y = consoleHeight;
+    newScreenBufferSize.X = ::consoleWidth;
+    newScreenBufferSize.Y = ::consoleHeight;
     if(!SetConsoleScreenBufferSize(hConsole, newScreenBufferSize)) {
         cout << "\nError in " << to_string(__LINE__) << " line: " << GetLastError();
         exit(-1);
     }
+
+    // открытие консоли во весь экран
+    ::SendMessage(::GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
+
+    getConsoleWH();
+    ::positionFromTop = ::consoleHeight / 2 - 15;  // высота игрового поля == 30
 
     // сделать курсор невидимым
     CONSOLE_CURSOR_INFO structCursorInfo;
