@@ -30,8 +30,8 @@ struct ClickInfo
 {
     short x, y;
     char button;
-    // 'l' - Р›РљРњ
-    // 'r' - РџРљРњ
-    // 'w' - РєРѕР»РµСЃРёРєРѕ (wheel)
+    // 'l' - ЛКМ
+    // 'r' - ПКМ
+    // 'w' - колесико (wheel)
     bool outside_field;
 };

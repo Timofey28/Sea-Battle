@@ -44,19 +44,19 @@ void ArrangementValidity::LocateFoundShip(int x, int y, const vector<vector<bool
 {
     shipCoords_begin_x_ = x;
     shipCoords_begin_y_ = y;
-    if(x + 1 < 10 && location_field[x + 1][y]) {  // Р»РёР±Рѕ РєРѕСЂР°Р±Р»СЊ РїСЂРѕРґРѕР»Р¶Р°РµС‚СЃСЏ РІРїСЂР°РІРѕ
+    if(x + 1 < 10 && location_field[x + 1][y]) {  // либо корабль продолжается вправо
         shipCoords_end_y_ = y;
         while(x + 1 < 10 && location_field[++x][y])
             shipCoords_end_x_ = x;
         decks_amount = shipCoords_end_x_ - shipCoords_begin_x_ + 1;
     }
-    else if(y + 1 < 10 && location_field[x][y + 1]) {  // Р»РёР±Рѕ РІРЅРёР·
+    else if(y + 1 < 10 && location_field[x][y + 1]) {  // либо вниз
         shipCoords_end_x_ = x;
         while(y + 1 < 10 && location_field[x][++y])
             shipCoords_end_y_ = y;
         decks_amount = shipCoords_end_y_ - shipCoords_begin_y_ + 1;
     }
-    else {  // Р»РёР±Рѕ РѕРЅ РѕРґРЅРѕРїР°Р»СѓР±РЅС‹Р№
+    else {  // либо он однопалубный
         shipCoords_end_x_ = x;
         shipCoords_end_y_ = y;
         decks_amount = 1;

@@ -12,7 +12,7 @@ int positionFromTop = -3;
 Field fMe, fEnemy;
 clock_t startTime;
 
-void setConsole();
+void configureConsole();
 void getConsoleWH();
 int firstMenu();
 void draw_shipsArrangement(int indent);
@@ -28,13 +28,13 @@ void draw_manual(int indent);
 int main()
 {
     setlocale(0, "");
-    setConsole();
+    configureConsole();
 
     fEnemy.shipsArrangement_forComputer();
 
     int choice = firstMenu();
 
-    int indent_1Field = (consoleWidth / 2 - 1) / 2 - 30; // Ð´Ð»Ð¸Ð½Ð° Ð¿Ð¾Ð»Ñ == 61
+    int indent_1Field = (consoleWidth / 2 - 1) / 2 - 30; // äëèíà ïîëÿ == 61
     fMe.zeroCoordPointerX = indent_1Field + 2;
     fMe.zeroCoordPointerY = positionFromTop + 2;
     fEnemy.zeroCoordPointerY = positionFromTop + 2;
@@ -102,7 +102,7 @@ void playTime(int indent2nd)
             if(!hitAgain) draw_arrows(fMe, "green");
             this_thread::sleep_for(500ms);
             if(fMe.aboutToFinishAShip) {
-                if(x1 == -1) { // Ð²Ñ‹Ð±Ð¾Ñ€ Ð¼Ð°ÐºÑÐ¸Ð¼ÑƒÐ¼ Ð¸Ð· 4 ÑÑ‚Ð¾Ñ€Ð¾Ð½
+                if(x1 == -1) { // âûáîð ìàêñèìóì èç 4 ñòîðîí
                     sides.clear();
                     if(x0 > 0 && !fMe.wasShotAt(x0 - 1, y0)) sides.push_back('l');
                     if(x0 < 9 && !fMe.wasShotAt(x0 + 1, y0)) sides.push_back('r');
@@ -116,13 +116,13 @@ void playTime(int indent2nd)
                         case 'd': fieldY = y0 + 1; fieldX = x0; break;
                     }
                 }
-                else { // Ð²Ñ‹Ð±Ð¾Ñ€ Ð¼Ð°ÐºÑÐ¸Ð¼ÑƒÐ¼ Ð¸Ð· 2 ÑÑ‚Ð¾Ñ€Ð¾Ð½
+                else { // âûáîð ìàêñèìóì èç 2 ñòîðîí
                     sides.clear();
-                    if(x0 != x1) { // ÐºÐ¾Ñ€Ð°Ð±Ð»ÑŒ Ð³Ð¾Ñ€Ð¸Ð·Ð¾Ð½Ñ‚Ð°Ð»ÑŒÐ½Ñ‹Ð¹
+                    if(x0 != x1) { // êîðàáëü ãîðèçîíòàëüíûé
                         if(x0 > 0 && !fMe.wasShotAt(x0 - 1, y0)) sides.push_back('l');
                         if(x1 < 9 && !fMe.wasShotAt(x1 + 1, y0)) sides.push_back('r');
                     }
-                    else { // Ð²ÐµÑ€Ñ‚Ð¸ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹
+                    else { // âåðòèêàëüíûé
                         if(y0 > 0 && !fMe.wasShotAt(x0, y0 - 1)) sides.push_back('u');
                         if(y1 < 9 && !fMe.wasShotAt(x0, y1 + 1)) sides.push_back('d');
                     }
@@ -207,7 +207,7 @@ void playTime(int indent2nd)
 int firstMenu()
 {
     system("cls");
-    int shipsIndent = consoleWidth / 2 - 12; // Ð´Ð»Ð¸Ð½Ð° ÑÐ»Ð¾Ð²Ð° Ships == 25
+    int shipsIndent = consoleWidth / 2 - 12; // äëèíà ñëîâà Ships == 25
     string indent1(shipsIndent, ' ');
     string indent2(shipsIndent - 19, ' ');
     cout << indent1 << " ____  _     _\
@@ -215,7 +215,7 @@ int firstMenu()
 \n" << indent1 << "\\___ \\| '_ \\| | '_ \\/ __|\
 \n" << indent1 << " ___) | | | | | |_) \\__ \\\
 \n" << indent1 << "|____/|_| |_|_| .__/|___/\
-\n" << indent1 << "              |_|\                        _\
+\n" << indent1 << "              |_|                        _\
 \n" << indent2 << "  __ _ _ __ _ __ __ _ _ __   __ _  ___ _ __ ___   ___ _ __ | |_\
 \n" << indent2 << " / _` | '__| '__/ _` | '_ \\ / _` |/ _ \\ '_ ` _ \\ / _ \\ '_ \\| __|\
 \n" << indent2 << "| (_| | |  | | | (_| | | | | (_| |  __/ | | | | |  __/ | | | |_\
@@ -224,7 +224,7 @@ int firstMenu()
 
     setPosition(0, consoleHeight / 2);
     int manualIndent = (consoleWidth / 2 - 1) / 2 - 17   +1;
-    string indent3(manualIndent, ' '); // Ð´Ð»Ð¸Ð½Ð° ÑÐ»Ð¾Ð²Ð° Manual == 34
+    string indent3(manualIndent, ' '); // äëèíà ñëîâà Manual == 34
     string indent4(consoleWidth / 2 - 1 - manualIndent - 34 + 3 + (consoleWidth / 2 - 1) / 2 - 11   -1, ' ');
     setColor(4); cout << indent3 << " __  __                         _";      setColor(1); cout << indent4 << "     _         _\n";
     setColor(4); cout << indent3 << "|  \\/  | __ _ _ __  _   _  __ _| |   "; setColor(1); cout << indent4 << "/ \\  _   _| |_ ___\n";
@@ -239,16 +239,16 @@ int firstMenu()
     }
     setColor(15);
 
-    HANDLE hin = GetStdHandle(STD_INPUT_HANDLE); // Ð¿Ð¾Ð»ÑƒÑ‡Ð°ÐµÐ¼ Ð´ÐµÑÐºÑ€Ð¸Ð¿Ñ‚Ð¾Ñ€
-    INPUT_RECORD InputRecord; // Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÑ‚ÑÑ Ð´Ð»Ñ Ð²Ð¾Ð·Ð²Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ñ Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ð¸ Ð¾ Ð²Ñ…Ð¾Ð´Ð½Ñ‹Ñ… ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸ÑÑ… Ð² ÐºÐ¾Ð½ÑÐ¾Ð»ÑŒÐ½Ð¾Ð¼ Ð²Ñ…Ð¾Ð´Ð½Ð¾Ð¼ Ð±ÑƒÑ„ÐµÑ€Ðµ
+    HANDLE hin = GetStdHandle(STD_INPUT_HANDLE); // ïîëó÷àåì äåñêðèïòîð
+    INPUT_RECORD InputRecord; // èñïîëüçóåòñÿ äëÿ âîçâðàùåíèÿ èíôîðìàöèè î âõîäíûõ ñîîáùåíèÿõ â êîíñîëüíîì âõîäíîì áóôåðå
     DWORD Events; // unsigned long
     COORD coord;
 
-    // Ð—Ð°Ð¿Ñ€ÐµÑ‚Ð¸Ñ‚ÑŒ Ð²Ñ‹Ð´ÐµÐµÐ½Ð¸Ðµ ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸
+    // Çàïðåòèòü âûäååíèå êîíñîëè
     DWORD prev_mode;
     GetConsoleMode(hin, &prev_mode);
     SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_EXTENDED_FLAGS | (prev_mode & ~ENABLE_QUICK_EDIT_MODE));
-    SetConsoleMode(hin, ENABLE_MOUSE_INPUT); // Ñ€Ð°Ð·Ñ€ÐµÑˆÐ°ÐµÐ¼ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÑƒ Ð¼Ñ‹ÑˆÐ¸
+    SetConsoleMode(hin, ENABLE_MOUSE_INPUT); // ðàçðåøàåì îáðàáîòêó ìûøè
 
     while(1) {
         ReadConsoleInput(hin, &InputRecord, 1, &Events);
@@ -333,7 +333,7 @@ void draw_play(int indent2nd)
 
     setColor(13);
     setPosition(indent2nd, positionFromTop - 1);
-    cout << "   Ð     Ð‘     Ð’     Ð“     Ð”     Ð•     Ð–     Ð—     Ð˜     Ðš";
+    cout << "   À     Á     Â     Ã     Ä     Å     Æ     Ç     È     Ê";
     for(int i = 0; i < 10; ++i) {
         setPosition(indent2nd - 4, positionFromTop + 2 + i * 3);
         if(i != 9) cout << ' ';
@@ -385,87 +385,62 @@ void draw_arrows(Field& field, string how)
 void victory()
 {
     draw_arrows(fEnemy, "empty");
-    int indentX = consoleWidth / 2 - 18; // ÑˆÐ¸Ñ€Ð¸Ð½Ð° ÑÐ»Ð¾Ð²Ð° == 36
+    int indentX = consoleWidth / 2 - 18; // øèðèíà ñëîâà == 36
     int indentY = consoleHeight / 3;
     setColor(10);
     setPosition(indentX, indentY); cout << "__     ___      _";
     setPosition(indentX, indentY + 1); cout << "\\ \\   / (_) ___| |_ ___  _ __ _   _ ";
-    setPosition(indentX, indentY + 2); cout << " \\ \\ / /| |/ __| __/ _ \\| '__| | | |";
-    setPosition(indentX, indentY + 3); cout << "  \\ V / | | (__| || (_) | |  | |_| |";
-    setPosition(indentX, indentY + 4); cout << "   \\_/  |_|\\___|\\__\\___/|_|   \\__, |";
-    setPosition(indentX, indentY + 5); cout << "                              |___/";
+    setPosition(indentX, indentY + 2); cout << " \\ \\ / /| |/ __| __/ _ \\| '__| | | | ";
+    setPosition(indentX, indentY + 3); cout << "  \\ V / | | (__| || (_) | |  | |_| | ";
+    setPosition(indentX, indentY + 4); cout << "   \\_/  |_|\\___|\\__\\___/|_|   \\__, | ";
+    setPosition(indentX, indentY + 5); cout << "                              |___/ ";
     setColor(15);
 }
 
 void loss()
 {
     draw_arrows(fMe, "empty");
-    int indentX = consoleWidth / 2 - 15; // ÑˆÐ¸Ñ€Ð¸Ð½Ð° ÑÐ»Ð¾Ð²Ð° == 30
+    int indentX = consoleWidth / 2 - 15; // øèðèíà ñëîâà == 30
     int indentY = consoleHeight / 3;
     setColor(4);
     setPosition(indentX, indentY); cout << " _     ___  ____  _____ ____";
-    setPosition(indentX, indentY + 1); cout << "| |   / _ \\/ ___|| ____|  _ \\";
-    setPosition(indentX, indentY + 2); cout << "| |  | | | \\___ \\|  _| | |_) |";
-    setPosition(indentX, indentY + 3); cout << "| |__| |_| |___) | |___|  _ <";
-    setPosition(indentX, indentY + 4); cout << "|_____\\___/|____/|_____|_| \\_\\";
+    setPosition(indentX, indentY + 1); cout << "| |   / _ \\/ ___|| ____|  _ \\ ";
+    setPosition(indentX, indentY + 2); cout << "| |  | | | \\___ \\|  _| | |_) | ";
+    setPosition(indentX, indentY + 3); cout << "| |__| |_| |___) | |___|  _ < ";
+    setPosition(indentX, indentY + 4); cout << "|_____\\___/|____/|_____|_| \\_\\ ";
     setColor(15);
 }
 
-//void loss()
-//{
-//    int indentX = consoleWidth / 2 - 58; // ÑˆÐ¸Ñ€Ð¸Ð½Ð° ÑÐ»Ð¾Ð²Ð° == 117
-//    int indentY = consoleHeight / 2 - 12;
-//    setColor(4);
-//    setPosition(indentX + 10, indentY); cout << "_____           _______                   _____                    _____                    _____";
-//    setPosition(indentX + 9, indentY + 1); cout << "/\\    \\         /::\\    \\                 /\\    \\                  /\\    \\                  /\\    \\";
-//    setPosition(indentX + 8, indentY + 2); cout << "/::\\____\\       /::::\\    \\               /::\\    \\                /::\\    \\                /::\\    \\";
-//    setPosition(indentX + 7, indentY + 3); cout << "/:::/    /      /::::::\\    \\             /::::\\    \\              /::::\\    \\              /::::\\    \\";
-//    setPosition(indentX + 6, indentY + 4); cout << "/:::/    /      /::::::::\\    \\           /::::::\\    \\            /::::::\\    \\            /::::::\\    \\";
-//    setPosition(indentX + 5, indentY + 5); cout << "/:::/    /      /:::/~~\\:::\\    \\         /:::/\\:::\\    \\          /:::/\\:::\\    \\          /:::/\\:::\\    \\";
-//    setPosition(indentX + 4, indentY + 6); cout << "/:::/    /      /:::/    \\:::\\    \\       /:::/__\\:::\\    \\        /:::/__\\:::\\    \\        /:::/__\\:::\\    \\";
-//    setPosition(indentX + 3, indentY + 7); cout << "/:::/    /      /:::/    / \\:::\\    \\      \\:::\\   \\:::\\    \\      /::::\\   \\:::\\    \\      /::::\\   \\:::\\    \\";
-//    setPosition(indentX + 2, indentY + 8); cout << "/:::/    /      /:::/____/   \\:::\\____\\   ___\\:::\\   \\:::\\    \\    /::::::\\   \\:::\\    \\    /::::::\\   \\:::\\    \\";
-//    setPosition(indentX + 1, indentY + 9); cout << "/:::/    /      |:::|    |     |:::|    | /\\   \\:::\\   \\:::\\    \\  /:::/\\:::\\   \\:::\\    \\  /:::/\\:::\\   \\:::\\____\\";
-//    setPosition(indentX, indentY + 10); cout << "/:::/____/       |:::|____|     |:::|    |/::\\   \\:::\\   \\:::\\____\\/:::/__\\:::\\   \\:::\\____\\/:::/  \\:::\\   \\:::|    |";
-//    setPosition(indentX, indentY + 11); cout << "\\:::\\    \\        \\:::\\    \\   /:::/    / \\:::\\   \\:::\\   \\::/    /\\:::\\   \\:::\\   \\::/    /\\::/   |::::\\  /:::|____|";
-//    setPosition(indentX + 1, indentY + 12); cout << "\\:::\\    \\        \\:::\\    \\ /:::/    /   \\:::\\   \\:::\\   \\/____/  \\:::\\   \\:::\\   \\/____/  \\/____|:::::\\/:::/    /";
-//    setPosition(indentX + 2, indentY + 13); cout << "\\:::\\    \\        \\:::\\    /:::/    /     \\:::\\   \\:::\\    \\       \\:::\\   \\:::\\    \\            |:::::::::/    /";
-//    setPosition(indentX + 3, indentY + 14); cout << "\\:::\\    \\        \\:::\\__/:::/    /       \\:::\\   \\:::\\____\\       \\:::\\   \\:::\\____\\           |::|\\::::/    /";
-//    setPosition(indentX + 4, indentY + 15); cout << "\\:::\\    \\        \\::::::::/    /         \\:::\\  /:::/    /        \\:::\\   \\::/    /           |::| \\::/____/";
-//    setPosition(indentX + 5, indentY + 16); cout << "\\:::\\    \\        \\::::::/    /           \\:::\\/:::/    /          \\:::\\   \\/____/            |::|  ~|";
-//    setPosition(indentX + 6, indentY + 17); cout << "\\:::\\    \\        \\::::/    /             \\::::::/    /            \\:::\\    \\                |::|   |";
-//    setPosition(indentX + 7, indentY + 18); cout << "\\:::\\____\\        \\::/____/               \\::::/    /              \\:::\\____\\               \\::|   |";
-//    setPosition(indentX + 8, indentY + 19); cout << "\\::/    /         ~~                      \\::/    /                \\::/    /                \\:|   |";
-//    setPosition(indentX + 9, indentY + 20); cout << "\\/____/                                   \\/____/                  \\/____/                  \\|___|";
-//    setColor(15);
-//}
-
-void setConsole()
+void configureConsole()
 {
-    // Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ð¸Ðµ ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸ Ð²Ð¾ Ð²ÐµÑÑŒ ÑÐºÑ€Ð°Ð½
-    ::SendMessage(::GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
+    int monitorHeight = GetSystemMetrics(SM_CYSCREEN);  // âûñîòà ìîíèòîðà êîìïüþòåðà â ïèêñåëÿõ
+    int suitableFontSize = monitorHeight / 40;
 
-    // ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ñ€Ð°Ð·Ð¼ÐµÑ€Ð° ÑˆÑ€Ð¸Ñ„Ñ‚Ð° Ð² ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸
+    // óñòàíîâêà ðàçìåðà øðèôòà â êîíñîëè
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-//    CONSOLE_FONT_INFOEX fontInfo;
-//    fontInfo.cbSize = sizeof(fontInfo);
-//    GetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
-//    fontInfo.dwFontSize.Y = 24;
-//    SetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
+    CONSOLE_FONT_INFOEX fontInfo;
+    fontInfo.cbSize = sizeof(fontInfo);
+    GetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
+    fontInfo.dwFontSize.Y = suitableFontSize;
+    SetCurrentConsoleFontEx(hConsole, TRUE, &fontInfo);
 
+    // óñòàíîâêà ðàçìåðà áóôåðà ýêðàíà ðàâíûì òåêóùåìó ðàçìåðó îêíà
     getConsoleWH();
-    positionFromTop = consoleHeight / 2 - 15   -1; // Ð²Ñ‹ÑÐ¾Ñ‚Ð° Ð¸Ð³Ñ€Ð¾Ð²Ð¾Ð³Ð¾ Ð¿Ð¾Ð»Ñ == 30
-
-    // ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ñ€Ð°Ð·Ð¼ÐµÑ€Ð° Ð±ÑƒÑ„ÐµÑ€Ð° ÑÐºÑ€Ð°Ð½Ð° Ñ€Ð°Ð²Ð½Ñ‹Ð¼ Ñ‚ÐµÐºÑƒÑ‰ÐµÐ¼Ñƒ Ñ€Ð°Ð·Ð¼ÐµÑ€Ñƒ Ð¾ÐºÐ½Ð°
     COORD newScreenBufferSize;
-    newScreenBufferSize.X = consoleWidth;
-    newScreenBufferSize.Y = consoleHeight;
+    newScreenBufferSize.X = ::consoleWidth;
+    newScreenBufferSize.Y = ::consoleHeight;
     if(!SetConsoleScreenBufferSize(hConsole, newScreenBufferSize)) {
         cout << "\nError in " << to_string(__LINE__) << " line: " << GetLastError();
         exit(-1);
     }
 
-    // ÑÐ´ÐµÐ»Ð°Ñ‚ÑŒ ÐºÑƒÑ€ÑÐ¾Ñ€ Ð½ÐµÐ²Ð¸Ð´Ð¸Ð¼Ñ‹Ð¼
+    // îòêðûòèå êîíñîëè âî âåñü ýêðàí
+    ::SendMessage(::GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
+
+    getConsoleWH();
+    ::positionFromTop = ::consoleHeight / 2 - 15;  // âûñîòà èãðîâîãî ïîëÿ == 30
+
+    // ñäåëàòü êóðñîð íåâèäèìûì
     CONSOLE_CURSOR_INFO structCursorInfo;
     GetConsoleCursorInfo(hConsole, &structCursorInfo);
     structCursorInfo.bVisible = FALSE;
