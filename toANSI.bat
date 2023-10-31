@@ -1,6 +1,6 @@
 @echo off
 
-set FILES= main.cpp field.h field.cpp
+set FILES= src\main.cc src\field.h src\field.cc src\arrangement_validity.h src\arrangement_validity.cc src\game_process.h src\game_process.cc src\draw.h
 
 
 for %%a in (%FILES%) do (
@@ -19,13 +19,13 @@ IF NOT EXIST %FILE% (
 	echo no such file
 	goto :eof
 )
-iconv -f utf-8 -t windows-1251 %FILE% > temp.cpp 2> NUL
+iconv -f utf-8 -t windows-1251 %FILE% > SomeNameThatIWouldNeverCallAFileInAProject.cpp 2> NUL
 IF ERRORLEVEL 1 (
-	del temp.cpp
+	del SomeNameThatIWouldNeverCallAFileInAProject.cpp
 	echo already in ANSI
 ) ELSE (
-	copy temp.cpp %FILE% > NUL
-	del temp.cpp
+	copy SomeNameThatIWouldNeverCallAFileInAProject.cpp %FILE% > NUL
+	del SomeNameThatIWouldNeverCallAFileInAProject.cpp
 	echo converted to ANSI
 )
 goto :eof
