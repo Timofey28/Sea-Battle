@@ -2,7 +2,7 @@
     Данный класс содержит метод isValid(), который
     определяет валидность расстановки кораблей на поле
 
-    Метод используется в классе Field -> shipsArrangement_manual()
+    Метод используется в классе Field -> ArrangeShipsForPerson()
 */
 
 #pragma once
@@ -18,8 +18,12 @@ class ArrangementValidity
     bool OtherShipsTooClose(std::vector<std::vector<bool>>& checkout, const std::vector<std::vector<bool>>& location_field);
     bool CoordsBelongToShip(int x, int y);
 public:
-    bool too_many_decks;
     bool current_validity;
+    bool validity_of_those_already_on_the_field;
 
     bool IsValid(const std::vector<std::vector<bool>>& location_field);
+    int Get_1deckShipsAmount() { return ships_1_deck; }
+    int Get_2deckShipsAmount() { return ships_2_deck; }
+    int Get_3deckShipsAmount() { return ships_3_deck; }
+    int Get_4deckShipsAmount() { return ships_4_deck; }
 };

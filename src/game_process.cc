@@ -1,29 +1,55 @@
 #include "game_process.h"
-using namespace std;
 
 GameProcess::GameProcess()
 {
     assert(positionFromTop != -1 && nConsoleWidth != -1 && nConsoleHeight != -1);
-    fieldMe = make_unique<Field>();
-    fieldEnemy = make_unique<Field>();
+    fieldLeft = make_unique<Field>();
+    fieldRight = make_unique<Field>();
     indentX_1stField = nConsoleWidth * 1 / 4 - 30;
     indentX_2ndField = nConsoleWidth * 3 / 4 - 30;
-    fieldMe->zeroCoordPointerX = indentX_1stField + 2;
-    fieldMe->zeroCoordPointerY = positionFromTop + 2;
-    fieldEnemy->zeroCoordPointerX = indentX_2ndField + 2;
-    fieldEnemy->zeroCoordPointerY = positionFromTop + 2;
+    fieldLeft->zeroCoordPointerX = indentX_1stField + 2;
+    fieldLeft->zeroCoordPointerY = positionFromTop + 2;
+    fieldRight->zeroCoordPointerX = indentX_2ndField + 2;
+    fieldRight->zeroCoordPointerY = positionFromTop + 2;
+    fieldLeft->SetLeftFieldIndents(indentX_1stField, positionFromTop);
+    fieldRight->SetLeftFieldIndents(indentX_1stField, positionFromTop);
+    goBack = 0;
 }
 
-void GameProcess::ArrangeShips()
+void GameProcess::ArrangeShips(bool singleGame)
 {
-    fieldEnemy->ArrangeShipsRandomly();
-    fieldMe->ArrangeShipsForPerson();
+    if(singleGame) {  // одиночная игра
+        fieldRight->ArrangeShipsRandomly();
+        if(fieldLeft->ArrangeShipsForPerson(1, 0, 0)) {
+            goBack = 1;
+            return;
+        }
+    }
+    else {  // совместная игра
+        if(fieldLeft->ArrangeShipsForPerson(0, 1, 0)) {
+            goBack = 1;
+            return;
+        }
+        if(fieldRight->ArrangeShipsForPerson(0, 0, 1)) {
+            goBack = 1;
+            return;
+        }
+    }
 }
 
-void GameProcess::Play()
+bool GameProcess::GoBack()
+{
+    if(goBack) {
+        goBack = 0;
+        return 1;
+    }
+    else return 0;
+}
+
+void GameProcess::Play_1player()
 {
     draw::EmptyField(indentX_2ndField, positionFromTop);
-    draw::CoordinatesToField(indentX_2ndField, positionFromTop);
+    draw::CoordinatesToRightField(indentX_2ndField, positionFromTop);
 
     int fieldX, fieldY;
     vector<int> free(100);
@@ -41,22 +67,24 @@ void GameProcess::Play()
     while(1) {
         while(2) {
             if(!hitAgain) draw::MoveIndicatingArrows(indentX_2ndField, "green");
-            clickInfo = fieldEnemy->GetClickCoords_PlayTime();
-            if(clock() - startTime <= 1000) continue;
+            do clickInfo = fieldRight->clickCoordinates.Get_PlayTime(fieldRight->zeroCoordPointerX, fieldRight->zeroCoordPointerY);
+            while(fieldRight->WasShotAt(clickInfo.x, clickInfo.y));
+            if(clock() - startTime <= 500) continue;
+            startTime = clock();
             fieldX = clickInfo.x;
             fieldY = clickInfo.y;
-            bool result = fieldEnemy->ShootAt(fieldX, fieldY);
-            if(!result) {
+            bool success = fieldRight->ShootAt(fieldX, fieldY);
+            if(!success) {
                 draw::MoveIndicatingArrows(indentX_2ndField, "empty");
                 hitAgain = 0;
                 break;
             }
 
-            if(fieldEnemy->deadCounter == 10) {
-                draw::MoveIndicatingArrows(indentX_1stField, "empty");
-                draw::Victory();
+            if(fieldRight->deadCounter == 10) {
+                draw::MoveIndicatingArrows(indentX_2ndField, "empty");
+                draw::Victory(1);
                 _getch();
-                fieldEnemy->ReturnPreviousConsoleMode();
+                fieldRight->ReturnPreviousConsoleMode();
                 exit(0);
             }
             if(!hitAgain) {
@@ -68,13 +96,13 @@ void GameProcess::Play()
         while(2) {
             if(!hitAgain) draw::MoveIndicatingArrows(indentX_1stField, "green");
             this_thread::sleep_for(500ms);
-            if(fieldMe->aboutToFinishAShip) {
+            if(fieldLeft->aboutToFinishAShip) {
                 if(x1 == -1) {  // выбор максимум из 4 сторон
                     sides.clear();
-                    if(x0 > 0 && !fieldMe->WasShotAt(x0 - 1, y0)) sides.push_back('l');
-                    if(x0 < 9 && !fieldMe->WasShotAt(x0 + 1, y0)) sides.push_back('r');
-                    if(y0 > 0 && !fieldMe->WasShotAt(x0, y0 - 1)) sides.push_back('u');
-                    if(y0 < 9 && !fieldMe->WasShotAt(x0, y0 + 1)) sides.push_back('d');
+                    if(x0 > 0 && !fieldLeft->WasShotAt(x0 - 1, y0)) sides.push_back('l');
+                    if(x0 < 9 && !fieldLeft->WasShotAt(x0 + 1, y0)) sides.push_back('r');
+                    if(y0 > 0 && !fieldLeft->WasShotAt(x0, y0 - 1)) sides.push_back('u');
+                    if(y0 < 9 && !fieldLeft->WasShotAt(x0, y0 + 1)) sides.push_back('d');
                     assert(sides.size());
                     switch(sides[mersenne() % sides.size()]) {
                         case 'l': fieldX = x0 - 1; fieldY = y0; break;
@@ -86,12 +114,12 @@ void GameProcess::Play()
                 else {  // выбор максимум из 2 сторон
                     sides.clear();
                     if(x0 != x1) {  // корабль горизонтальный
-                        if(x0 > 0 && !fieldMe->WasShotAt(x0 - 1, y0)) sides.push_back('l');
-                        if(x1 < 9 && !fieldMe->WasShotAt(x1 + 1, y0)) sides.push_back('r');
+                        if(x0 > 0 && !fieldLeft->WasShotAt(x0 - 1, y0)) sides.push_back('l');
+                        if(x1 < 9 && !fieldLeft->WasShotAt(x1 + 1, y0)) sides.push_back('r');
                     }
                     else {  // корабль вертикальный
-                        if(y0 > 0 && !fieldMe->WasShotAt(x0, y0 - 1)) sides.push_back('u');
-                        if(y1 < 9 && !fieldMe->WasShotAt(x0, y1 + 1)) sides.push_back('d');
+                        if(y0 > 0 && !fieldLeft->WasShotAt(x0, y0 - 1)) sides.push_back('u');
+                        if(y1 < 9 && !fieldLeft->WasShotAt(x0, y1 + 1)) sides.push_back('d');
                     }
                     assert(sides.size());
                     switch(sides[mersenne() % sides.size()]) {
@@ -107,16 +135,16 @@ void GameProcess::Play()
                     fieldX = free[no] / 10;
                     fieldY = free[no] % 10;
                     no++;
-                }while(fieldMe->WasShotAt(fieldX, fieldY));
+                }while(fieldLeft->WasShotAt(fieldX, fieldY));
             }
-            bool result = fieldMe->ShootAt(fieldX, fieldY);
-            if(!result) {
+            bool success = fieldLeft->ShootAt(fieldX, fieldY);
+            if(!success) {
                 draw::MoveIndicatingArrows(indentX_1stField, "empty");
                 hitAgain = 0;
                 break;
             }
 
-            if(fieldMe->aboutToFinishAShip) {
+            if(fieldLeft->aboutToFinishAShip) {
                 if(x0 == -1) {
                     x0 = fieldX;
                     y0 = fieldY;
@@ -154,18 +182,90 @@ void GameProcess::Play()
                 sides.clear();
             }
 
-            if(fieldMe->deadCounter == 10) {
-                draw::MoveIndicatingArrows(indentX_2ndField, "empty");
-                draw::Loss();
-                fieldEnemy->RevealSurvivorsAfterLoss();
+            if(fieldLeft->deadCounter == 10) {
+                draw::MoveIndicatingArrows(indentX_1stField, "empty");
+                fieldRight->RevealSurvivorsAfterVictory();
+                draw::Loss(1);
                 _getch();
-                fieldMe->ReturnPreviousConsoleMode();
+                fieldLeft->ReturnPreviousConsoleMode();
                 exit(0);
             }
 
             if(!hitAgain) {
                 hitAgain = 1;
                 draw::MoveIndicatingArrows(indentX_1stField, "red");
+            }
+        }
+    }
+}
+
+void GameProcess::Play_2players()
+{
+    fieldLeft->ClearFieldFromShips();
+    draw::EmptyField(indentX_2ndField, positionFromTop);
+    draw::CoordinatesToBothFields(indentX_1stField, indentX_2ndField, positionFromTop);
+    int fieldX, fieldY;
+    bool hitAgain = false;
+    ClickInfo clickInfo;
+
+    setColor(11);
+    int whoGoesFirst = mersenne() % 2;
+    if(whoGoesFirst) goto playerOnRight;
+    while(1) {
+        while(2) {  // игрок слева бьет по правому полю
+            if(!hitAgain) draw::MoveIndicatingArrows(indentX_2ndField, "green", 1);
+            do clickInfo = fieldRight->clickCoordinates.Get_PlayTime(fieldRight->zeroCoordPointerX, fieldRight->zeroCoordPointerY);
+            while(fieldRight->WasShotAt(clickInfo.x, clickInfo.y));
+            fieldX = clickInfo.x;
+            fieldY = clickInfo.y;
+            bool success = fieldRight->ShootAt(fieldX, fieldY);
+            if(!success) {
+                draw::MoveIndicatingArrows(indentX_2ndField, "empty", 1);
+                hitAgain = 0;
+                break;
+            }
+
+            if(fieldRight->deadCounter == 10) {
+                draw::MoveIndicatingArrows(indentX_2ndField, "empty", 1);
+                fieldLeft->RevealSurvivorsAfterVictory();
+                draw::Victory(0, 1);
+                draw::Loss(0, 2);
+                _getch();
+                fieldRight->ReturnPreviousConsoleMode();
+                exit(0);
+            }
+            if(!hitAgain) {
+                hitAgain = 1;
+                draw::MoveIndicatingArrows(indentX_2ndField, "red", 1);
+            }
+        }
+
+        playerOnRight:
+        while(2) {  // игрок справа бьет по левому полю
+            if(!hitAgain) draw::MoveIndicatingArrows(indentX_1stField, "green", 1);
+            do clickInfo = fieldLeft->clickCoordinates.Get_PlayTime(fieldLeft->zeroCoordPointerX, fieldLeft->zeroCoordPointerY);
+            while(fieldLeft->WasShotAt(clickInfo.x, clickInfo.y));
+            fieldX = clickInfo.x;
+            fieldY = clickInfo.y;
+            bool success = fieldLeft->ShootAt(fieldX, fieldY);
+            if(!success) {
+                draw::MoveIndicatingArrows(indentX_1stField, "empty", 1);
+                hitAgain = 0;
+                break;
+            }
+
+            if(fieldLeft->deadCounter == 10) {
+                draw::MoveIndicatingArrows(indentX_1stField, "empty", 1);
+                fieldRight->RevealSurvivorsAfterVictory();
+                draw::Victory(0, 2);
+                draw::Loss(0, 1);
+                _getch();
+                fieldLeft->ReturnPreviousConsoleMode();
+                exit(0);
+            }
+            if(!hitAgain) {
+                hitAgain = 1;
+                draw::MoveIndicatingArrows(indentX_1stField, "red", 1);
             }
         }
     }

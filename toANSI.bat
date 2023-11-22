@@ -1,6 +1,6 @@
 @echo off
 
-set FILES= src\main.cc src\field.h src\field.cc src\arrangement_validity.h src\arrangement_validity.cc src\game_process.h src\game_process.cc src\draw.h
+set FILES= src\main.cc src\field.h src\field.cc src\arrangement_validity.h src\arrangement_validity.cc src\game_process.h src\game_process.cc src\draw.h src\click_coordinates.h src\click_coordinates.cc
 
 
 for %%a in (%FILES%) do (

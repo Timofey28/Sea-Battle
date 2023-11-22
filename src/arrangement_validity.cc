@@ -1,10 +1,9 @@
 #include "arrangement_validity.h"
-using namespace std;
 
 bool ArrangementValidity::IsValid(const vector<vector<bool>>& location_field)
 {
-    too_many_decks = false;
     current_validity = false;
+    validity_of_those_already_on_the_field = false;
     vector<vector<bool>> checkout = vector<vector<bool>>(10, vector<bool>(10));
     ships_1_deck = 0;
     ships_2_deck = 0;
@@ -15,11 +14,7 @@ bool ArrangementValidity::IsValid(const vector<vector<bool>>& location_field)
         for(int j = 0; j < 10; ++j) {
             if(!checkout[i][j] && location_field[i][j]) {
                 LocateFoundShip(i, j, location_field);
-                if(decks_amount > 4) {
-                    too_many_decks = true;
-                    return 0;
-                }
-                if(OtherShipsTooClose(checkout, location_field)) return 0;
+                if(decks_amount > 4 || OtherShipsTooClose(checkout, location_field)) return 0;
                 if(decks_amount == 1) ships_1_deck++;
                 else if(decks_amount == 2) ships_2_deck++;
                 else if(decks_amount == 3) ships_3_deck++;
@@ -28,11 +23,10 @@ bool ArrangementValidity::IsValid(const vector<vector<bool>>& location_field)
         }
     }
 
-    ships_1_deck -= 4;
-    ships_2_deck -= 3;
-    ships_3_deck -= 2;
-    ships_4_deck -= 1;
-    if(ships_1_deck || ships_2_deck || ships_3_deck || ships_4_deck) return 0;
+    if(ships_1_deck <= 4 && ships_2_deck <= 3 && ships_3_deck <= 2 && ships_4_deck <= 1)
+        validity_of_those_already_on_the_field = true;
+
+    if(ships_1_deck != 4 || ships_2_deck != 3 || ships_3_deck != 2 || ships_4_deck != 1) return 0;
     else {
         current_validity = true;
         return 1;

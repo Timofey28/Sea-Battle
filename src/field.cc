@@ -1,5 +1,4 @@
 #include "field.h"
-using namespace std;
 mt19937 mersenne(static_cast<unsigned int>(time(0)));
 
 void setPosition(int x, int y);
@@ -18,7 +17,6 @@ Field::Field()
     zeroCoordPointerX = 0;
     zeroCoordPointerY = 0;
     aboutToFinishAShip = false;
-    GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &prev_mode);
 }
 
 void Field::ArrangeShipsRandomly()
@@ -183,53 +181,104 @@ void Field::ArrangeShipsRandomly()
     }
 }
 
-void Field::ArrangeShipsForPerson()
+bool Field::ArrangeShipsForPerson(bool singleGame, bool firstPlayer, bool secondPlayer)
 {
     system("cls");
-    draw::EmptyField(zeroCoordPointerX - 2, zeroCoordPointerY - 2);
-    draw::ships_arrangement::InstructionText(zeroCoordPointerX - 2, zeroCoordPointerY - 6, "write");
-    draw::ships_arrangement::Buttons("draw");
+    assert(singleGame == 1 && firstPlayer == 0 && secondPlayer == 0 ||
+           singleGame == 0 && firstPlayer == 1 && secondPlayer == 0 ||
+           singleGame == 0 && firstPlayer == 0 && secondPlayer == 1);
+    namespace dsa = draw::ships_arrangement;
+    if(singleGame)        dsa::Phrase_ArrangeYourShips("write");
+    else if(firstPlayer)  dsa::Phrase_PlayerOnTheLeft("write");
+    else if(secondPlayer) dsa::Phrase_PlayerOnTheRight("write");
+    draw::EmptyField(indentX_LeftField, indentY_LeftField);
+    dsa::Buttons("draw");
+    dsa::ResetShipsAmounts();
+    dsa::RemainingShips("draw");
     ClickInfo clickInfo;
     ArrangementValidity arrangementValidity;
+    bool previousValidity = 1;
     while(1) {
-        clickInfo = GetClickCoords_ShipsArrangement();
+        clickInfo = clickCoordinates.Get_ShipsArrangement(indentX_LeftField + 2, indentY_LeftField + 2);
         if(clickInfo.outside_field) {
             if(clickInfo.buttonExit_isPressed) {
-                SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), prev_mode);
+                ReturnPreviousConsoleMode();
                 exit(0);
+            }
+
+            if(clickInfo.buttonHelp_isPressed) {
+                system("cls");
+                dsa::InstructionText(indentX_LeftField, indentY_LeftField - 4, "write");
+                clickCoordinates.Get_AnyClick();
+                system("cls");
+                if(singleGame)        dsa::Phrase_ArrangeYourShips("write");
+                else if(firstPlayer)  dsa::Phrase_PlayerOnTheLeft("write");
+                else if(secondPlayer) dsa::Phrase_PlayerOnTheRight("write");
+                draw::EmptyField(indentX_LeftField, indentY_LeftField);
+                DrawShips();
+                dsa::Buttons("draw");
+                if(previousValidity) dsa::RemainingShips("redraw");
+                else dsa::Phrase_invalidSet("write");
+            }
+
+            if(clickInfo.buttonBack_isPressed) {
+                for(int i = 0; i < 10; ++i) {
+                    for(int j = 0; j < 10; ++j) {
+                        location[i][j] = 0;
+                    }
+                }
+                dsa::buttonClear_isActive = 0;
+                dsa::buttonDone_isActive = 0;
+                dsa::ResetShipsAmounts();
+                return 1;
             }
 
             if(clickInfo.buttonAuto_isPressed) {
                 ArrangeShipsRandomly();
                 DrawShips();
-                if(!draw::ships_arrangement::buttonClear_isActive) {
-                    draw::ships_arrangement::buttonClear_isActive = 1;
-                    draw::ships_arrangement::ButtonClear(1);
+                if(!dsa::buttonClear_isActive) {
+                    dsa::buttonClear_isActive = 1;
+                    dsa::ButtonClear(1);
                 }
-                if(!draw::ships_arrangement::buttonDone_isActive) {
-                    draw::ships_arrangement::buttonDone_isActive = 1;
-                    draw::ships_arrangement::ButtonDone(1);
+                if(!dsa::buttonDone_isActive) {
+                    dsa::buttonDone_isActive = 1;
+                    dsa::ButtonDone(1);
                 }
+                if(!previousValidity) {
+                    dsa::Phrase_invalidSet("clear");
+                    previousValidity = 1;
+                }
+                dsa::RemainingShips("draw", 0, 0, 0, 0);
             }
 
             else if(clickInfo.buttonClear_isPressed) {
-                if(draw::ships_arrangement::buttonClear_isActive) {
+                if(dsa::buttonClear_isActive) {
                     RemoveAllShipsFromField();
                     DrawShips();
-                    draw::ships_arrangement::buttonClear_isActive = 0;
-                    draw::ships_arrangement::ButtonClear(0);
-                    if(draw::ships_arrangement::buttonDone_isActive) {
-                        draw::ships_arrangement::buttonDone_isActive = 0;
-                        draw::ships_arrangement::ButtonDone(0);
+                    dsa::buttonClear_isActive = 0;
+                    dsa::ButtonClear(0);
+                    if(dsa::buttonDone_isActive) {
+                        dsa::buttonDone_isActive = 0;
+                        dsa::ButtonDone(0);
                     }
+                    if(!previousValidity) {
+                        dsa::Phrase_invalidSet("clear");
+                        previousValidity = 1;
+                    }
+                    dsa::RemainingShips("draw");
                 }
             }
 
             else if(clickInfo.buttonDone_isPressed) {
-                if(draw::ships_arrangement::buttonDone_isActive) {
-                    draw::ships_arrangement::InstructionText(zeroCoordPointerX - 2, zeroCoordPointerY - 6, "clear");
-                    draw::ships_arrangement::Buttons("clear");
-                    return;
+                if(dsa::buttonDone_isActive) {
+                    if(singleGame)        dsa::Phrase_ArrangeYourShips("clear");
+                    else if(firstPlayer)  dsa::Phrase_PlayerOnTheLeft("clear");
+                    else if(secondPlayer) dsa::Phrase_PlayerOnTheRight("clear");
+                    dsa::Buttons("clear");
+                    dsa::buttonClear_isActive = 0;
+                    dsa::buttonDone_isActive = 0;
+                    dsa::RemainingShips("draw", 0, 0, 0, 0);
+                    return 0;
                 }
             }
         }
@@ -246,25 +295,43 @@ void Field::ArrangeShipsForPerson()
                 shouldChangeSomething = 1;
             }
             if(shouldChangeSomething) {
-                setPosition(zeroCoordPointerX + clickInfo.x * 6, zeroCoordPointerY + clickInfo.y * 3);
+                setPosition(indentX_LeftField + 2 + clickInfo.x * 6, indentY_LeftField + 2 + clickInfo.y * 3);
                 cout << "   ";
                 setColor(15);
                 arrangementValidity.IsValid(location);
-                if(arrangementValidity.current_validity && !draw::ships_arrangement::buttonDone_isActive) {
-                    draw::ships_arrangement::buttonDone_isActive = 1;
-                    draw::ships_arrangement::ButtonDone(1);
+                if(arrangementValidity.current_validity && !dsa::buttonDone_isActive) {
+                    dsa::buttonDone_isActive = 1;
+                    dsa::ButtonDone(1);
                 }
-                else if(!arrangementValidity.current_validity && draw::ships_arrangement::buttonDone_isActive) {
-                    draw::ships_arrangement::buttonDone_isActive = 0;
-                    draw::ships_arrangement::ButtonDone(0);
+                else if(!arrangementValidity.current_validity && dsa::buttonDone_isActive) {
+                    dsa::buttonDone_isActive = 0;
+                    dsa::ButtonDone(0);
                 }
-                if(FieldIsEmpty() && draw::ships_arrangement::buttonClear_isActive) {
-                    draw::ships_arrangement::buttonClear_isActive = 0;
-                    draw::ships_arrangement::ButtonClear(0);
+                if(FieldIsEmpty() && dsa::buttonClear_isActive) {
+                    dsa::buttonClear_isActive = 0;
+                    dsa::ButtonClear(0);
                 }
-                else if(!FieldIsEmpty() && !draw::ships_arrangement::buttonClear_isActive) {
-                    draw::ships_arrangement::buttonClear_isActive = 1;
-                    draw::ships_arrangement::ButtonClear(1);
+                else if(!FieldIsEmpty() && !dsa::buttonClear_isActive) {
+                    dsa::buttonClear_isActive = 1;
+                    dsa::ButtonClear(1);
+                }
+
+                if(arrangementValidity.validity_of_those_already_on_the_field) {
+                    int d1 = 4 - arrangementValidity.Get_1deckShipsAmount();
+                    int d2 = 3 - arrangementValidity.Get_2deckShipsAmount();
+                    int d3 = 2 - arrangementValidity.Get_3deckShipsAmount();
+                    int d4 = 1 - arrangementValidity.Get_4deckShipsAmount();
+                    if(!previousValidity) {
+                        previousValidity = 1;
+                        dsa::Phrase_invalidSet("clear");
+                        dsa::ResetShipsAmounts();
+                    }
+                    dsa::RemainingShips("draw", d1, d2, d3, d4);
+                }
+                else if(previousValidity) {
+                    dsa::RemainingShips("draw", 0, 0, 0, 0);
+                    previousValidity = 0;
+                    dsa::Phrase_invalidSet("write");
                 }
             }
         }
@@ -287,144 +354,7 @@ bool Field::FieldIsEmpty()
     return 1;
 }
 
-ClickInfo Field::GetClickCoords_ShipsArrangement()
-{
-    namespace dsa = draw::ships_arrangement;
-    HANDLE hin = GetStdHandle(STD_INPUT_HANDLE); // получаем дескриптор
-    INPUT_RECORD InputRecord; // используется для возвращения информации о входных сообщениях в консольном входном буфере
-    DWORD Events; // unsigned long
-    COORD coord;
-
-    // Запретить выдеение консоли
-    SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_EXTENDED_FLAGS | (prev_mode & ~ENABLE_QUICK_EDIT_MODE));
-    SetConsoleMode(hin, ENABLE_MOUSE_INPUT); // разрешаем обработку мыши
-
-    short x, y;
-    ClickInfo clickInfo;
-    while(1) {
-        ReadConsoleInput(hin, &InputRecord, 1, &Events);
-        DWORD buttonPressed = InputRecord.Event.MouseEvent.dwButtonState;
-        if(buttonPressed == MOUSE_WHEELED ||
-           buttonPressed == FROM_LEFT_1ST_BUTTON_PRESSED ||
-           buttonPressed == RIGHTMOST_BUTTON_PRESSED)
-        {
-            x = InputRecord.Event.MouseEvent.dwMousePosition.X - (zeroCoordPointerX - 2);
-            y = InputRecord.Event.MouseEvent.dwMousePosition.Y - (zeroCoordPointerY - 2);
-            if(x > 0 && x < 61 && (x % 6 != 0) && y > 0 && y <= 30) {
-                if(buttonPressed == MOUSE_WHEELED) continue;
-                x /= 6;
-                y = (y-1) / 3;
-                clickInfo.x = x;
-                clickInfo.y = y;
-                switch(buttonPressed) {
-                    case FROM_LEFT_1ST_BUTTON_PRESSED: clickInfo.button = 'l'; break;
-                    case RIGHTMOST_BUTTON_PRESSED:     clickInfo.button = 'r'; break;
-                }
-                clickInfo.outside_field = 0;
-                return clickInfo;
-            }
-            x += zeroCoordPointerX - 2;
-            y += zeroCoordPointerY - 2;
-            if(x >= dsa::indentX_leftColumn + 2 && x < dsa::indentX_leftColumn + dsa::width_leftColumn - 2 &&
-               y > dsa::indentY_lower && y < dsa::indentY_lower + dsa::heightOfCells - 1)
-            {
-                switch(buttonPressed) {
-                    case FROM_LEFT_1ST_BUTTON_PRESSED: clickInfo.button = 'l'; break;
-                    case RIGHTMOST_BUTTON_PRESSED:     clickInfo.button = 'r'; break;
-                    case MOUSE_WHEELED:                clickInfo.button = 'w'; break;
-                }
-                clickInfo.outside_field = 1;
-                clickInfo.buttonExit_isPressed = 1;
-                clickInfo.buttonAuto_isPressed = 0;
-                clickInfo.buttonClear_isPressed = 0;
-                clickInfo.buttonDone_isPressed = 0;
-                return clickInfo;
-            }
-            if(x >= dsa::indentX_rightColumn + 2 && x < dsa::indentX_rightColumn + dsa::width_rightColumn - 2 &&
-               y > dsa::indentY_upper && y < dsa::indentY_upper + dsa::heightOfCells - 1)
-            {
-                switch(buttonPressed) {
-                    case FROM_LEFT_1ST_BUTTON_PRESSED: clickInfo.button = 'l'; break;
-                    case RIGHTMOST_BUTTON_PRESSED:     clickInfo.button = 'r'; break;
-                    case MOUSE_WHEELED:                clickInfo.button = 'w'; break;
-                }
-                clickInfo.outside_field = 1;
-                clickInfo.buttonExit_isPressed = 0;
-                clickInfo.buttonAuto_isPressed = 1;
-                clickInfo.buttonClear_isPressed = 0;
-                clickInfo.buttonDone_isPressed = 0;
-                return clickInfo;
-            }
-            if(x >= dsa::indentX_rightColumn + 2 && x < dsa::indentX_rightColumn + dsa::width_rightColumn - 2 &&
-               y > dsa::indentY_middle && y < dsa::indentY_middle + dsa::heightOfCells - 1)
-            {
-                switch(buttonPressed) {
-                    case FROM_LEFT_1ST_BUTTON_PRESSED: clickInfo.button = 'l'; break;
-                    case RIGHTMOST_BUTTON_PRESSED:     clickInfo.button = 'r'; break;
-                    case MOUSE_WHEELED:                clickInfo.button = 'w'; break;
-                }
-                clickInfo.outside_field = 1;
-                clickInfo.buttonExit_isPressed = 0;
-                clickInfo.buttonAuto_isPressed = 0;
-                clickInfo.buttonClear_isPressed = 1;
-                clickInfo.buttonDone_isPressed = 0;
-                return clickInfo;
-            }
-            if(x >= dsa::indentX_rightColumn + 2 && x < dsa::indentX_rightColumn + dsa::width_rightColumn - 2 &&
-               y > dsa::indentY_lower && y < dsa::indentY_lower + dsa::heightOfCells - 1)
-            {
-                switch(buttonPressed) {
-                    case FROM_LEFT_1ST_BUTTON_PRESSED: clickInfo.button = 'l'; break;
-                    case RIGHTMOST_BUTTON_PRESSED:     clickInfo.button = 'r'; break;
-                    case MOUSE_WHEELED:                clickInfo.button = 'w'; break;
-                }
-                clickInfo.outside_field = 1;
-                clickInfo.buttonExit_isPressed = 0;
-                clickInfo.buttonAuto_isPressed = 0;
-                clickInfo.buttonClear_isPressed = 0;
-                clickInfo.buttonDone_isPressed = 1;
-                return clickInfo;
-            }
-        }
-    }
-}
-
-ClickInfo Field::GetClickCoords_PlayTime()
-{
-    HANDLE hin = GetStdHandle(STD_INPUT_HANDLE); // получаем дескриптор
-    INPUT_RECORD InputRecord; // используется для возвращения информации о входных сообщениях в консольном входном буфере
-    DWORD Events; // unsigned long
-    COORD coord;
-
-    short x, y;
-    ClickInfo clickInfo;
-    while(1) {
-        ReadConsoleInput(hin, &InputRecord, 1, &Events);
-        DWORD buttonPressed = InputRecord.Event.MouseEvent.dwButtonState;
-        if(buttonPressed == MOUSE_WHEELED ||
-           buttonPressed == FROM_LEFT_1ST_BUTTON_PRESSED ||
-           buttonPressed == RIGHTMOST_BUTTON_PRESSED)
-        {
-            x = InputRecord.Event.MouseEvent.dwMousePosition.X - (zeroCoordPointerX - 2);
-            y = InputRecord.Event.MouseEvent.dwMousePosition.Y - (zeroCoordPointerY - 2);
-            if(x > 0 && x < 61 && (x % 6 != 0) && y > 0 && y <= 30) {
-                x /= 6;
-                y = (y-1) / 3;
-                if(shooting[x][y]) continue;
-                clickInfo.x = x;
-                clickInfo.y = y;
-                switch(buttonPressed) {
-                    case FROM_LEFT_1ST_BUTTON_PRESSED: clickInfo.button = 'l'; break;
-                    case RIGHTMOST_BUTTON_PRESSED:     clickInfo.button = 'r'; break;
-                    case MOUSE_WHEELED:                clickInfo.button = 'w'; break;
-                }
-                return clickInfo;
-            }
-        }
-    }
-}
-
-void Field::RevealSurvivorsAfterLoss()
+void Field::RevealSurvivorsAfterVictory()
 {
     for(int i = 0; i < 10; ++i) {
         for(int j = 0; j < 10; ++j) {
@@ -605,7 +535,7 @@ void Field::DrawShips()
 {
     for(int x = 0; x < 10; ++x) {
         for(int y = 0; y < 10; ++y) {
-            setPosition(zeroCoordPointerX + x * 6, zeroCoordPointerY + y * 3);
+            setPosition(indentX_LeftField + 2 + x * 6, indentY_LeftField + 2 + y * 3);
             if(location[x][y]) {
                 setColor(102);
                 cout << "   ";
@@ -614,6 +544,18 @@ void Field::DrawShips()
             else cout << "   ";
         }
     }
+}
+
+void Field::ClearFieldFromShips()
+{
+    setColor(0);
+    for(int x = 0; x < 10; ++x) {
+        for(int y = 0; y < 10; ++y) {
+            setPosition(zeroCoordPointerX + x * 6, zeroCoordPointerY + y * 3);
+            cout << "   ";
+        }
+    }
+    setColor(15);
 }
 
 void setPosition(int x, int y)

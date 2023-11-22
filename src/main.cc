@@ -8,12 +8,13 @@
 #include <conio.h>
 #include <Windows.h>
 #include "field.cc"
-#include "arrangement_validity.cc"
 #include "game_process.cc"
-using namespace std;
+#include "arrangement_validity.cc"
+#include "click_coordinates.cc"
 
 int nConsoleWidth = -1, nConsoleHeight = -1;
 int positionFromTop = -1;
+DWORD prev_mode;
 
 void configureConsole();
 void getConsoleWH();
@@ -22,17 +23,31 @@ void getConsoleWH();
 int main()
 {
     setlocale(0, "");
-
     configureConsole();
+
     GameProcess gameProcess;
-    gameProcess.ArrangeShips();
-    gameProcess.Play();
+    ClickCoordinates clickCoordinates;
+
+    while(1) {
+        draw::GameModeSelection();
+        bool singleGame = clickCoordinates.Get_GameModeSelection(draw::wallLeftEdgeCoordX);
+        gameProcess.ArrangeShips(singleGame);
+        if(gameProcess.GoBack()) {
+            SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ::prev_mode);
+            continue;
+        }
+        if(singleGame) gameProcess.Play_1player();
+        else           gameProcess.Play_2players();
+        break;
+    }
 
     return 0;
 }
 
 void configureConsole()
 {
+    GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &::prev_mode);
+
     int monitorHeight = GetSystemMetrics(SM_CYSCREEN);  // высота монитора компьютера в пикселях
     int suitableFontSize = monitorHeight / 40;
 
@@ -58,7 +73,7 @@ void configureConsole()
     ::SendMessage(::GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
 
     getConsoleWH();
-    ::positionFromTop = ::nConsoleHeight / 2 - 15;  // высота игрового поля == 30
+    ::positionFromTop = ::nConsoleHeight / 2 - 14;  // высота игрового поля == 30
 
     // сделать курсор невидимым
     CONSOLE_CURSOR_INFO structCursorInfo;

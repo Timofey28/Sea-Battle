@@ -1,17 +1,16 @@
 #pragma once
 #include "arrangement_validity.h"
+#include "click_coordinates.h"
 #include "draw.h"
-
-struct ClickInfo;
+extern DWORD prev_mode;
 
 class Field
 {
     std::vector<std::vector<bool>> location = std::vector<std::vector<bool>>(10, std::vector<bool>(10));
     std::vector<std::vector<bool>> shooting = std::vector<std::vector<bool>>(10, std::vector<bool>(10));
     std::vector<std::vector<bool>> occupied = std::vector<std::vector<bool>>(10, std::vector<bool>(10));
-    DWORD prev_mode;
+    int indentX_LeftField, indentY_LeftField;
 
-    ClickInfo GetClickCoords_ShipsArrangement();
     void MarkEmptyCellAsShot(int fieldX, int fieldY);
     void CircleDeadShip(int x, int y, std::vector<char> sides);
     void RemoveAllShipsFromField();
@@ -20,28 +19,16 @@ public:
     int zeroCoordPointerX, zeroCoordPointerY;
     int deadCounter;
     bool aboutToFinishAShip;
+    ClickCoordinates clickCoordinates;
 
     Field();
     void ArrangeShipsRandomly();
-    void ArrangeShipsForPerson();
-    ClickInfo GetClickCoords_PlayTime();
+    bool ArrangeShipsForPerson(bool singleGame, bool firstPlayer, bool secondPlayer);
     bool ShootAt(int x, int y);
     bool WasShotAt(int x, int y) { return shooting[x][y]; }
     void DrawShips();
-    void RevealSurvivorsAfterLoss();
-    void ReturnPreviousConsoleMode() { SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), prev_mode); }
-};
-
-struct ClickInfo
-{
-    short x, y;
-    char button;
-    // 'l' - ЛКМ
-    // 'r' - ПКМ
-    // 'w' - колесико (wheel)
-    bool outside_field;
-    bool buttonExit_isPressed,
-         buttonAuto_isPressed,
-         buttonClear_isPressed,
-         buttonDone_isPressed;
+    void ClearFieldFromShips();
+    void RevealSurvivorsAfterVictory();
+    void ReturnPreviousConsoleMode() { SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ::prev_mode); }
+    void SetLeftFieldIndents(int indentX, int indentY) { indentX_LeftField = indentX; indentY_LeftField = indentY; }
 };
