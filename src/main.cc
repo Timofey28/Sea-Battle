@@ -6,11 +6,11 @@
 #include <ctime>
 #include <thread>
 #include <conio.h>
-#include <Windows.h>
-#include "field.cc"
-#include "game_process.cc"
-#include "arrangement_validity.cc"
-#include "click_coordinates.cc"
+#include <windows.h>
+
+#include "draw.h"
+#include "game_process.h"
+#include "click_coordinates.h"
 
 int nConsoleWidth = -1, nConsoleHeight = -1;
 int positionFromTop = -1;
@@ -38,7 +38,6 @@ int main()
         }
         if(singleGame) gameProcess.Play_1player();
         else           gameProcess.Play_2players();
-        break;
     }
 
     return 0;

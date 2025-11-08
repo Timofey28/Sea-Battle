@@ -1,4 +1,5 @@
 #include "arrangement_validity.h"
+using namespace std;
 
 bool ArrangementValidity::IsValid(const vector<vector<bool>>& location_field)
 {

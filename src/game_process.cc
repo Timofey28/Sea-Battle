@@ -54,7 +54,7 @@ void GameProcess::Play_1player()
     int fieldX, fieldY;
     vector<int> free(100);
     for(int i = 0; i < 100; ++i) free[i] = i;
-    random_shuffle(free.begin(), free.end(), [](int i){return mersenne() % i;});
+    shuffle(free.begin(), free.end(), mersenne);
     int no = 0;
     int x0 = -1, y0, x1 = -1, y1;  // to finish a ship...
     vector<char> sides;
@@ -231,8 +231,8 @@ void GameProcess::Play_2players()
                 draw::Victory(0, 1);
                 draw::Loss(0, 2);
                 _getch();
-                fieldRight->ReturnPreviousConsoleMode();
-                exit(0);
+//                fieldRight->ReturnPreviousConsoleMode();
+                return;
             }
             if(!hitAgain) {
                 hitAgain = 1;
@@ -260,8 +260,8 @@ void GameProcess::Play_2players()
                 draw::Victory(0, 2);
                 draw::Loss(0, 1);
                 _getch();
-                fieldLeft->ReturnPreviousConsoleMode();
-                exit(0);
+//                fieldLeft->ReturnPreviousConsoleMode();
+                return;
             }
             if(!hitAgain) {
                 hitAgain = 1;

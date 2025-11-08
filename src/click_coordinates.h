@@ -1,7 +1,10 @@
 #pragma once
-extern DWORD prev_mode;
+#include <windows.h>
+#include "draw.h"
 
+extern DWORD prev_mode;
 struct ClickInfo;
+
 
 class ClickCoordinates
 {

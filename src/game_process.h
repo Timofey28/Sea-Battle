@@ -1,5 +1,17 @@
 #pragma once
+
+#include <vector>
+#include <algorithm>
+#include <memory>
+#include <random>
+#include <conio.h>
+#include <thread>
+
+#include "field.h"
+
 extern int positionFromTop, nConsoleWidth, nConsoleHeight;
+extern std::mt19937 mersenne;
+
 
 class GameProcess
 {

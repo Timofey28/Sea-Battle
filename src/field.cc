@@ -1,23 +1,8 @@
 #include "field.h"
-mt19937 mersenne(static_cast<unsigned int>(time(0)));
 
+std::mt19937 mersenne(std::random_device{}());
 void setPosition(int x, int y);
 void setColor(int color);
-
-Field::Field()
-{
-    for(int i = 0; i < 10; ++i) {
-        for(int j = 0; j < 10; ++j) {
-            location[i][j] = false;
-            shooting[i][j] = false;
-            occupied[i][j] = false;
-        }
-    }
-    deadCounter = 0;
-    zeroCoordPointerX = 0;
-    zeroCoordPointerY = 0;
-    aboutToFinishAShip = false;
-}
 
 void Field::ArrangeShipsRandomly()
 {
@@ -30,7 +15,7 @@ void Field::ArrangeShipsRandomly()
 
     vector<int> free(100);
     for(int i = 0; i < 100; ++i) free[i] = i;
-    random_shuffle(free.begin(), free.end(), [](int i){return mersenne() % i;});
+    shuffle(free.begin(), free.end(), mersenne);
     int x, y, x1, y1, no = 0;
     char randomSide;
     // ------------4-палубный-----------------

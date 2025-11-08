@@ -1,0 +1,16 @@
+# IDE
+*.cbp
+*.depend
+*.layout
+
+# Service
+*.bat
+
+# builds
+bin/
+obj/
+*.exe
+
+# Do not ignore!
+!build.bat
+!Sea-Battle.exe
